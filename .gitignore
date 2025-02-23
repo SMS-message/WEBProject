@@ -1,5 +1,5 @@
 /.idea/
 /.venv/
-/data/blacklist.txt
-/logs/
+/bot/data/blacklist.txt
+/bot/logs/
 .env

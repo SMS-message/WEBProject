@@ -1,0 +1,96 @@
+* {
+    padding: 0;
+    margin: 0;
+    font-family: Montserrat, monospace;
+    color: #DDDDDD;
+}
+
+@font-face {
+    font-family: "Montserrat";
+
+    src: url("../fonts/Montserrat-Black.ttf") format("ttf");
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+
+body, html {
+    background: linear-gradient(90deg, rgba(10,10,10,1) 0%, rgba(25,25,25,1) 100%);
+}
+
+#headerDiv {
+    display: flex;
+
+    padding: 10px 50px 10px 50px;
+    background-color: #252525;
+}
+
+#gitHubDiv {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 155px;
+
+    background-color: #121212;
+    border: solid 2px #DDDDDD;
+    border-radius: 16px;
+
+    padding: 5px;
+    transition: all 200ms;
+}
+
+#gitHubDiv:hover {
+    transform: scale(105%);
+}
+
+#gitHubDiv > div {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+}
+
+#gitHubDiv > div > button {
+    width: fit-content;
+
+    border: none;
+    background: none;
+
+    font-weight: 1000;
+    font-size: 24px;
+}
+
+
+#mainBody {
+    padding: 50px 100px 0 100px;
+}
+
+#mainBody > h1 {
+    font-size: 64px;
+}
+
+#mainBody > h2 {
+    color: #AAAAAA;
+}
+
+#descriptionDiv {
+    width: 75%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    background: linear-gradient(90deg, rgba(14,22,33,1) 0%, rgba(36,47,61,1) 40%, rgba(43,83,120,1) 100%);
+
+    border-radius: 50px;
+    margin: 40px 0 0 0;
+    padding: 25px;
+}
+
+#descriptionDiv > img {
+    width: 500px;
+    height: 550px;
+}
+
+#descriptionDiv > div {
+    width: min(30vw);
+}
