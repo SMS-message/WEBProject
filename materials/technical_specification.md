@@ -20,7 +20,7 @@
     - Функции и декораторы:
    > main(), log_dialog(), log_all();
     - Классы:
-   > VideoHoster, Video;
+   > VideoHoster;
     - Библиотеки:
    > pyTelegramBotAPI, Flask, dotenv;
 6. Graphical interface.

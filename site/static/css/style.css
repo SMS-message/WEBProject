@@ -14,9 +14,10 @@
     font-display: swap;
 }
 
-
 body, html {
-    background: linear-gradient(90deg, rgba(10,10,10,1) 0%, rgba(25,25,25,1) 100%);
+    background-position: center;
+    background-repeat: no-repeat;
+    background: url("../img/bg.png");
 }
 
 #headerDiv {
@@ -56,6 +57,7 @@ body, html {
 
     border: none;
     background: none;
+    cursor: pointer;
 
     font-weight: 1000;
     font-size: 24px;
@@ -67,18 +69,23 @@ body, html {
 }
 
 #mainBody > h1 {
+    width: fit-content;
+    background: linear-gradient(90deg, rgba(10,10,10,1) 0%, rgba(25,25,25,1) 100%);
     font-size: 64px;
 }
 
 #mainBody > h2 {
+    width: fit-content;
+    background: linear-gradient(90deg, rgba(10,10,10,1) 0%, rgba(25,25,25,1) 100%);
     color: #AAAAAA;
 }
 
 #descriptionDiv {
-    width: 75%;
+    width: fit-content;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    align-items: center;
     background: linear-gradient(90deg, rgba(14,22,33,1) 0%, rgba(36,47,61,1) 40%, rgba(43,83,120,1) 100%);
 
     border-radius: 50px;
@@ -87,8 +94,14 @@ body, html {
 }
 
 #descriptionDiv > img {
-    width: 500px;
-    height: 550px;
+    width: fit-content;
+    height: fit-content;
+
+    border: double 10px #121212;
+    border-radius: 16px;
+
+    margin-left: 100px;
+
 }
 
 #descriptionDiv > div {

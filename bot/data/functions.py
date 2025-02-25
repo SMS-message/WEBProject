@@ -1,4 +1,5 @@
 import json
+import os.path
 from typing import List, Dict
 
 
@@ -18,8 +19,12 @@ def log_all(message_chat_id: int):
                 with open(f"logs/log_{message_chat_id}.json", mode="w", encoding="utf-8") as log_file:
                     json.dump([messages], log_file, ensure_ascii=False, indent=2)
     except FileNotFoundError:
-        with open(f"logs/log_{message_chat_id}.json", mode="w", encoding="utf-8") as log_file:
-            json.dump([messages], log_file, ensure_ascii=False, indent=2)
+        if os.path.exists(f"logs/log_{message_chat_id}.json"):
+            with open(f"logs/log_{message_chat_id}.json", mode="w", encoding="utf-8") as log_file:
+                json.dump([messages], log_file, ensure_ascii=False, indent=2)
+        else:
+            with open(f"logs/dialog_log_{message_chat_id}.json", mode="w", encoding="utf-8"):
+                pass
     except Exception as err:
         print(f"У пользователя {message_chat_id} ошибка: {err}")
 

@@ -1,3 +1,5 @@
+import sqlite3
+import datetime as dt
 from telebot.types import *
 from telebot import TeleBot
 from bot.data.functions import *
@@ -57,15 +59,48 @@ class VideoHoster:
                 filtered = True
             case "📹 Загрузить видео":
                 self.bot.send_message(message.chat.id, "Пришлите своё видео! :)", reply_markup=ReplyKeyboardRemove())
-                self.send_video(message)
+                self.bot.register_next_step_handler(message, self.send_video)
                 filtered = True
         return filtered
 
     def watch(self, message: Message):
         ...
 
-    def send_video(self, message: Message):
-        ...
+    def send_video(self, message: Message) -> None:
+        if message.content_type == "video":
+            if message.video.duration > 60:
+                self.bot.send_message(message.chat.id, "Извините, но ваше видео слишком длинное!")
+                self.menu(message)
+                return
+            date = dt.datetime.now()
+            con = sqlite3.connect("db/VideoHoster.db")
+            cur = con.cursor()
+            cur.execute(f"""
+            INSERT INTO Videos (
+                       message_id,
+                       author_id,
+                       day,
+                       month,
+                       year
+                   )
+                   VALUES (
+                       "{message.id}",
+                       "{message.chat.id}",
+                       "{date.day}",
+                       "{date.month}",
+                       "{date.year}"
+                   );
+                    """)
+            con.commit()
+            with open(f"videos/{message.chat.id}_{message.id}.mp4", mode="wb") as video_file:
+                file_info = self.bot.get_file(message.video.file_id)
+                video_file.write(self.bot.download_file(file_info.file_path))
+            markup = ReplyKeyboardMarkup()
+            markup.row(KeyboardButton("📺 Смотреть видео"), KeyboardButton("📹 Загрузить видео"))
+            self.bot.send_message(message.chat.id, "Видео успешно загружено на сервер!", reply_markup=markup)
+            self.bot.register_next_step_handler(message, self.menu)
+            return
+        self.menu(message)
 
     def clear_history(self, message: Message):
         try:
@@ -73,7 +108,3 @@ class VideoHoster:
                 pass
         except Exception as err:
             self.bot.send_message(self.hoster, f"Ошибка у пользователя {message.chat.id}: {err}")
-
-
-class Video:
-    ...
