@@ -1,5 +1,6 @@
-import sqlite3
 import datetime as dt
+from atexit import register
+
 from telebot.types import *
 from telebot import TeleBot
 from bot.data.functions import *
@@ -18,6 +19,8 @@ class VideoHoster:
             markup.row(KeyboardButton("📺 Смотреть видео"), KeyboardButton("📹 Загрузить видео"))
             if self.l:
                 log_all(message.chat.id)
+            if not user_table_exists(message.chat.id):  # TODO: Доделать создание таблицы в бд;
+                create_user_table(message.chat.id)
             self.clear_history(message)
             self.bot.send_message(message.chat.id, "Привет!", reply_markup=markup)
             self.bot.register_next_step_handler(message, self.menu)
@@ -59,14 +62,42 @@ class VideoHoster:
                 filtered = True
             case "📹 Загрузить видео":
                 self.bot.send_message(message.chat.id, "Пришлите своё видео! :)", reply_markup=ReplyKeyboardRemove())
-                self.bot.register_next_step_handler(message, self.send_video)
+                self.bot.register_next_step_handler(message, self.receive_video)
                 filtered = True
         return filtered
 
     def watch(self, message: Message):
-        ...
+        queue = make_queue(message.chat.id)
+        con = sqlite3.connect("db/VideoHoster.db")
+        cur = con.cursor()
+        for video_id in queue:
+            res = tuple(cur.execute(f"""SELECT message_id,
+                                               author_id
+                                          FROM Videos
+                                         WHERE ID = "{video_id}";
+                                        """))
+            message_id, author_id = res[0]
+            markup = InlineKeyboardMarkup()
+            markup.row(InlineKeyboardButton(text="♥", callback_data="♥"),
+                       InlineKeyboardButton(text="👎", callback_data="👎"),
+                       InlineKeyboardButton(text="⏩", callback_data="⏩"))
+            with open(f"videos/{author_id}_{message_id}.mp4", mode="rb") as video:
+                self.bot.send_video(message.chat.id, video, reply_markup=markup)
+            def filter_reaction(message: Message):
+                match message.text:
+                    case "♥":
+                        cur.execute(f"""UPDATE Videos
+                                           SET likes = likes + 1
+                                         WHERE ID = "{video_id}";
+                                        """)
+                    case "👎":
+                        cur.execute(f"""UPDATE Videos
+                                           SET likes = likes + 1
+                                         WHERE ID = "{video_id}";
+                                        """)
+            self.bot.register_next_step_handler(message, filter_reaction)
 
-    def send_video(self, message: Message) -> None:
+    def receive_video(self, message: Message) -> None:
         if message.content_type == "video":
             if message.video.duration > 60:
                 self.bot.send_message(message.chat.id, "Извините, но ваше видео слишком длинное!")
