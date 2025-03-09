@@ -12,7 +12,7 @@ def log_all(message_chat_id: int):
                 with open(f"logs/log_{message_chat_id}.json", mode="r+", encoding="utf-8") as log_file:
                     log: List[List[Dict]] = json.load(log_file)
                     log.append(messages)
-                with open(f"logs/log_{message_chat_id}.json", mode="w", encoding="utf-8") as log_file:
+                with open(f"logs/log_{message_chat_id}.json", mode="w", encoding="utf-8"):
                     pass
                 with open(f"logs/log_{message_chat_id}.json", mode="r+", encoding="utf-8") as log_file:
                     json.dump(log, log_file, ensure_ascii=False, indent=2)
@@ -105,6 +105,24 @@ def make_queue(user_id: int) -> List[int]:
     res = tuple(cur.execute(f"""SELECT ID
                                       FROM User_{user_id}"""))
     return refactor_result(res)
+
+
+def update_user_table(user_id: int):
+    con = sqlite3.connect("db/VideoHoster.db")
+    cur = con.cursor()
+
+    cur.execute(f"""
+                    INSERT INTO User_{user_id} (
+                               ID
+                           )
+                           SELECT ID
+                             FROM Videos
+                            WHERE ID NOT IN (
+                                      SELECT ID
+                                        FROM User_{user_id}
+                                  );
+                    """)
+    con.commit()
 
 
 def refactor_result(res: Tuple[Tuple[int]]) -> List[int]:

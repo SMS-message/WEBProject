@@ -15,13 +15,13 @@
 }
 
 body, html {
-    background-position: center;
-    background-repeat: no-repeat;
-    background: url("../img/bg.png");
+    background: url("../img/bg.png") no-repeat;
+    background-color: #121212;
 }
 
 #headerDiv {
     display: flex;
+    justify-content: space-between;
 
     padding: 10px 50px 10px 50px;
     background-color: #252525;
@@ -63,6 +63,23 @@ body, html {
     font-size: 24px;
 }
 
+#linksDiv {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 5px;
+}
+
+#linksDiv {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 155px;
+
+    padding: 5px;
+    transition: all 200ms;
+}
 
 #mainBody {
     padding: 50px 100px 0 100px;
