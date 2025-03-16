@@ -3,7 +3,7 @@ from random import shuffle
 
 from telebot.types import *
 from telebot import TeleBot
-from data.functions import *
+from .functions import *
 import json
 
 
@@ -17,6 +17,7 @@ class VideoHoster:
         try:
             markup = ReplyKeyboardMarkup()
             markup.row(KeyboardButton("📺 Смотреть видео"), KeyboardButton("📹 Зайти в студию"))
+            markup.resize_keyboard = True
             if self.l:
                 log_all(message.chat.id)
             if not user_table_exists(message.chat.id):
@@ -34,6 +35,7 @@ class VideoHoster:
             return
         markup = ReplyKeyboardMarkup()
         markup.row(KeyboardButton("📺 Смотреть видео"), KeyboardButton("📹 Зайти в студию"))
+        markup.resize_keyboard = True
         try:
             with open(f"logs/dialog_log_{message.chat.id}.json", mode="r", encoding="utf-8") as dialog_log:
                 messages = json.load(dialog_log)
@@ -66,7 +68,14 @@ class VideoHoster:
                 self.studio(message)
                 filtered = True
             case "📼 Просмотреть загруженные вами видео":
-                ...
+                con = sqlite3.connect("db/VideoHoster.db")
+                cur = con.cursor()
+                res = refactor_result(tuple(cur.execute(f"SELECT message_id FROM Videos WHERE author_id = '{message.chat.id}'")))
+                for message_id in res:
+                    with open(f"videos/{message.chat.id}_{message_id}.mp4", mode="rb") as video:
+                        self.bot.send_video(message.chat.id, video)
+                self.studio(message)
+                filtered = True
             case "📹 Загрузить видео":
                 self.bot.send_message(message.chat.id,"Пришлите своё видео :)", reply_markup=ReplyKeyboardRemove())
                 self.bot.register_next_step_handler(message, self.receive_video)
@@ -78,6 +87,7 @@ class VideoHoster:
             case "◀ Назад":
                 markup = ReplyKeyboardMarkup()
                 markup.row(KeyboardButton("📺 Смотреть видео"), KeyboardButton("📹 Зайти в студию"))
+                markup.resize_keyboard = True
                 self.bot.send_message(message.chat.id,
                                       f"Хорошо, что вы хотите сделать?",
                                       reply_markup=markup)
@@ -103,6 +113,7 @@ class VideoHoster:
         if not queue:
             markup = ReplyKeyboardMarkup()
             markup.row(KeyboardButton("📺 Смотреть видео"), KeyboardButton("📹 Загрузить видео"))
+            markup.resize_keyboard = True
             self.bot.send_message(message.chat.id, "В вашей очереди закончились видео, приходите снова!",
                                   reply_markup=markup)
             self.bot.register_next_step_handler(message, self.menu)
@@ -124,6 +135,7 @@ class VideoHoster:
         markup.row(KeyboardButton("❤"),
                    KeyboardButton("👎"),
                    KeyboardButton("⏩"))
+        markup.resize_keyboard = True
         with open(f"videos/{author_id}_{message_id}.mp4", mode="rb") as video:
             self.bot.send_video(message.chat.id, video, reply_markup=markup)
         self.bot.register_next_step_handler(message, self.update_db_by_reaction, queue)
@@ -156,6 +168,7 @@ class VideoHoster:
         markup = ReplyKeyboardMarkup()
         markup.row(KeyboardButton("📼 Просмотреть загруженные вами видео"), KeyboardButton("📹 Загрузить видео"))
         markup.row(KeyboardButton("🎥 Загрузить несколько видео"), KeyboardButton("◀ Назад"))
+        markup.resize_keyboard = True
         self.bot.send_message(message.chat.id, f"Добро пожаловать в студию, {message.chat.first_name}!",
                               reply_markup=markup)
         self.bot.register_next_step_handler(message, self.filter_messages)
