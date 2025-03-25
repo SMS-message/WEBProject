@@ -3,7 +3,7 @@ from random import shuffle
 
 from telebot.types import *
 from telebot import TeleBot
-from data.functions import *
+from .functions import *
 import json
 
 
@@ -17,6 +17,7 @@ class VideoHoster:
         try:
             markup = ReplyKeyboardMarkup()
             markup.row(KeyboardButton("📺 Смотреть видео"), KeyboardButton("📹 Зайти в студию"))
+            markup.resize_keyboard = True
             if self.l:
                 log_all(message.chat.id)
             if not user_table_exists(message.chat.id):
@@ -27,13 +28,14 @@ class VideoHoster:
             self.bot.send_message(message.chat.id, "Привет!", reply_markup=markup)
             self.bot.register_next_step_handler(message, self.menu)
         except Exception as err:
-            self.bot.send_message(self.hoster, f"Ошибка у пользователя {message.chat.id}: {err}")
+            self.bot.send_message(self.hoster, f"Ошибка у пользователя {message.chat.id} при выполнении метода greet(): {err}")
 
     def menu(self, message: Message) -> None:
         if self.filter_messages(message):
             return
         markup = ReplyKeyboardMarkup()
         markup.row(KeyboardButton("📺 Смотреть видео"), KeyboardButton("📹 Зайти в студию"))
+        markup.resize_keyboard = True
         try:
             with open(f"logs/dialog_log_{message.chat.id}.json", mode="r", encoding="utf-8") as dialog_log:
                 messages = json.load(dialog_log)
@@ -78,6 +80,7 @@ class VideoHoster:
             case "◀ Назад":
                 markup = ReplyKeyboardMarkup()
                 markup.row(KeyboardButton("📺 Смотреть видео"), KeyboardButton("📹 Зайти в студию"))
+                markup.resize_keyboard = True
                 self.bot.send_message(message.chat.id,
                                       f"Хорошо, что вы хотите сделать?",
                                       reply_markup=markup)
@@ -102,7 +105,8 @@ class VideoHoster:
     def send_video(self, message: Message, queue: List[int]):
         if not queue:
             markup = ReplyKeyboardMarkup()
-            markup.row(KeyboardButton("📺 Смотреть видео"), KeyboardButton("📹 Загрузить видео"))
+            markup.row(KeyboardButton("📺 Смотреть видео"), KeyboardButton("📹 Зайти в студию"))
+            markup.resize_keyboard = True
             self.bot.send_message(message.chat.id, "В вашей очереди закончились видео, приходите снова!",
                                   reply_markup=markup)
             self.bot.register_next_step_handler(message, self.menu)
@@ -124,6 +128,7 @@ class VideoHoster:
         markup.row(KeyboardButton("❤"),
                    KeyboardButton("👎"),
                    KeyboardButton("⏩"))
+        markup.resize_keyboard = True
         with open(f"videos/{author_id}_{message_id}.mp4", mode="rb") as video:
             self.bot.send_video(message.chat.id, video, reply_markup=markup)
         self.bot.register_next_step_handler(message, self.update_db_by_reaction, queue)

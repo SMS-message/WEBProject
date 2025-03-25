@@ -1,27 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <link rel="shortcut icon" href="static/icons/favicon.ico" type="image/x-icon">
-    <link rel="stylesheet" href="static/css/style.css">
-    <title>Умное имя сайта</title>
-</head>
-<body>
-<div id="headerDiv">
-    <div id="gitHubDiv">
-        <img src="static/img/github_dark.png" alt="" width="60" height="60">
-        <div>
-            <p>Get it on</p>
-            <button id="gitHubBtn">GitHub</button>
-        </div>
-    </div>
-    <div id="linksDiv">
-        <a href="/about">О проекте</a>
-        <a href="/authors">Авторы</a>
-    </div>
-</div>
-<div id="mainBody">
-    <h1>Твой Сервис С Короткими Видео</h1>
+{% extends "base.html" %}
+{% block content%}
+<h1>Твой Сервис С Короткими Видео</h1>
     <h2>Используй везде: дома, в поездке, на защите проекта...</h2>
     <div id="descriptionDiv">
         <div>
@@ -30,7 +9,4 @@
         </div>
         <img src="static/img/bot_interaction.png" alt="Взаимодействие с ботом">
     </div>
-</div>
-<script src="static/js/script.js"></script>
-</body>
-</html>
+{% endblock %}

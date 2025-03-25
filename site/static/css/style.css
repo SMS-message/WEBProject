@@ -75,10 +75,14 @@ body, html {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    width: 155px;
+    width: fit-content;
 
     padding: 5px;
     transition: all 200ms;
+}
+
+#linksDiv > a {
+    margin: 5px;
 }
 
 #mainBody {
