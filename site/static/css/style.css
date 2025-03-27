@@ -27,6 +27,11 @@ body, html {
     background-color: #252525;
 }
 
+#leftDiv {
+    display: flex;
+    flex-direction: row;
+}
+
 #gitHubDiv {
     display: flex;
     justify-content: space-between;
@@ -61,6 +66,18 @@ body, html {
 
     font-weight: 1000;
     font-size: 24px;
+}
+
+#nameDiv {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin: 0 0 0 40px;
+    padding: 5px;
+    transition: all 200ms;
+    font-size: 36px;
+    font-weight: 850;
 }
 
 #linksDiv {
@@ -127,4 +144,25 @@ body, html {
 
 #descriptionDiv > div {
     width: min(30vw);
+}
+
+#infoDiv {
+    width: fit-content;
+
+    border: 1px solid #FFFFFF;
+    border-radius: 16px;
+    background: #151515;
+    margin: 40px 0 0 0;
+    padding: 10px;
+}
+
+.paraDiv {
+    margin: 10px;
+}
+
+.commandLine {
+    border-left: 3px solid #1F92AD;
+    background: #444444;
+    padding: 2px;
+    margin: 5px;
 }

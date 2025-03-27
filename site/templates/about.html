@@ -2,4 +2,35 @@
 {% block content%}
 <h1>Немного о проекте</h1>
 <h2>А может и не немного. ;)</h2>
+<div id="infoDiv">
+    <div class="paraDiv">
+        <h3>О проекте</h3>
+        <p>VideoHoster - бот-сервис с короткими видео с открытым исходным кодом;</p>
+        <p>Количество строк кода: 374.</p>
+    </div>
+    <div class="paraDiv">
+        <h3>Установка</h3>
+        <p>Через installer.sh:</p>
+        <p>- Запустите файл installer.sh с помощью bash в командной строке, написав команду</p>
+        <p class="commandLine">bash installer.sh</p>
+        <p>Ручная установка</p>
+        <p>- Создать виртуальное окружение:</p>
+        <p class="commandLine">python -m venv .venv</p>
+        <p class="commandLine">venv/Scripts/activate</p>
+        <p>- Установить библиотеки:</p>
+        <p class="commandLine">pip install -r requirements.txt</p>
+        <p>- Создать необходимые для работы файлы:</p>
+        <p>
+            > директория bot/logs
+            > директория bot/videos
+            > файл bot/data/blacklist.txt
+        </p>
+
+    </div>
+    <div class="paraDiv">
+        <h3>Администрирование проекта</h3>
+        <p>Диалоги между ботом и пользователями сохраняются в директорию bot/logs;</p>
+        <p>При возникновении ошибок, они выводятся в консоль.</p>
+    </div>
+</div>
 {% endblock %}
