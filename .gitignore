@@ -3,4 +3,5 @@
 /bot/data/blacklist.txt
 /bot/logs/
 /bot/videos/
+/bot/db/VideoHosterBackup.db
 .env
