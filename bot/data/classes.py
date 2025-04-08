@@ -36,42 +36,51 @@ class VideoHoster:
         markup = ReplyKeyboardMarkup()
         markup.row(KeyboardButton("📺 Смотреть видео"), KeyboardButton("📹 Зайти в студию"))
         markup.resize_keyboard = True
-        try:
-            with open(f"logs/dialog_log_{message.chat.id}.json", mode="r", encoding="utf-8") as dialog_log:
-                messages = json.load(dialog_log)
-        except json.decoder.JSONDecodeError:
-            messages = []
+
         bot_text = "Извините, я вас не понял. Выберите одну из опций на вашей клавиатуре! 😉"
 
+        self.log(message, bot_text)
         self.bot.send_message(message.chat.id, bot_text, reply_markup=markup)
         self.bot.register_next_step_handler(message, self.menu)
 
     def filter_messages(self, message: Message) -> bool:
         filtered = False
+        bot_text: str = ""
         with open("data/blacklist.txt", mode="r") as file:
             if str(message.chat.id) in file.read():
-                self.bot.send_message(message.chat.id, "Извините, вы находитесь в чёрном списке бота")
+                bot_text = "Извините, вы находитесь в чёрном списке бота"
+                self.bot.send_message(message.chat.id, bot_text)
+                self.log(message, bot_text)
                 return True
         match message.text:
             case "/start":
                 self.greet(message)
-                filtered = True
+                return True
             case "📺 Смотреть видео":
-                self.bot.send_message(message.chat.id, "Загружаю доступные видео! :D",
+                bot_text = "Загружаю доступные видео! :D"
+                self.bot.send_message(message.chat.id, bot_text,
                                       reply_markup=ReplyKeyboardRemove())
                 self.watch(message)
                 filtered = True
-            case "📹 Зайти в студию":
-                self.studio(message)
+            case "📹 Зайти в студию":  #TODO: Чёт придумать со студией
+                markup = ReplyKeyboardMarkup()
+                markup.row(KeyboardButton("📼 Просмотреть загруженные вами видео"), KeyboardButton("📹 Загрузить видео"))
+                markup.row(KeyboardButton("🎥 Загрузить несколько видео"), KeyboardButton("◀ Назад"))
+                bot_text = f"Добро пожаловать в студию, {message.chat.first_name}!"
+                self.bot.send_message(message.chat.id, bot_text,
+                                      reply_markup=markup)
+                self.bot.register_next_step_handler(message, self.filter_messages)
                 filtered = True
             case "📼 Просмотреть загруженные вами видео":
                 ...
             case "📹 Загрузить видео":
-                self.bot.send_message(message.chat.id, "Пришлите своё видео :)", reply_markup=ReplyKeyboardRemove())
+                bot_text = "Пришлите своё видео :)"
+                self.bot.send_message(message.chat.id, bot_text, reply_markup=ReplyKeyboardRemove())
                 self.bot.register_next_step_handler(message, self.receive_video)
                 filtered = True
             case "🎥 Загрузить несколько видео":
-                self.bot.send_message(message.chat.id, "Хорошо, когда закончите напишите команду /stop",
+                bot_text = "Хорошо, когда закончите напишите команду /stop"
+                self.bot.send_message(message.chat.id, bot_text,
                                       reply_markup=ReplyKeyboardRemove())
                 self.bot.register_next_step_handler(message, self.receive_many_videos)
                 filtered = True
@@ -79,17 +88,26 @@ class VideoHoster:
                 markup = ReplyKeyboardMarkup()
                 markup.row(KeyboardButton("📺 Смотреть видео"), KeyboardButton("📹 Зайти в студию"))
                 markup.resize_keyboard = True
+
+                bot_text = "Хорошо, что вы хотите сделать?"
                 self.bot.send_message(message.chat.id,
-                                      f"Хорошо, что вы хотите сделать?",
+                                      bot_text,
                                       reply_markup=markup)
                 self.bot.register_next_step_handler(message, self.menu)
                 filtered = True
-
+        if self.l and bot_text:
+            self.log(message, bot_text)
         return filtered
 
     def receive_many_videos(self, message: Message):
         if message.text == "/stop":
-            self.studio(message)
+            markup = ReplyKeyboardMarkup()
+            markup.row(KeyboardButton("📼 Просмотреть загруженные вами видео"), KeyboardButton("📹 Загрузить видео"))
+            markup.row(KeyboardButton("🎥 Загрузить несколько видео"), KeyboardButton("◀ Назад"))
+            bot_text = f"Добро пожаловать в студию, {message.chat.first_name}!"
+            self.bot.send_message(message.chat.id, bot_text,
+                                  reply_markup=markup)
+            self.bot.register_next_step_handler(message, self.filter_messages)
             return
         self.receive_video(message, True)
         self.bot.register_next_step_handler(message, self.receive_many_videos)
@@ -105,7 +123,10 @@ class VideoHoster:
             markup = ReplyKeyboardMarkup()
             markup.row(KeyboardButton("📺 Смотреть видео"), KeyboardButton("📹 Зайти в студию"))
             markup.resize_keyboard = True
-            self.bot.send_message(message.chat.id, "В вашей очереди закончились видео, приходите снова!",
+
+            bot_text = "В вашей очереди закончились видео, приходите снова!"
+            self.log(message, bot_text)
+            self.bot.send_message(message.chat.id, bot_text,
                                   reply_markup=markup)
             self.bot.register_next_step_handler(message, self.menu)
             return
@@ -127,7 +148,9 @@ class VideoHoster:
                    KeyboardButton("👎"),
                    KeyboardButton("⏩"))
         markup.resize_keyboard = True
-        with open(f"videos/{author_id}_{message_id}.mp4", mode="rb") as video:
+        video_filename = f"videos/{author_id}_{message_id}.mp4"
+        with open(video_filename, mode="rb") as video:
+            self.log(message, video_filename)
             self.bot.send_video(message.chat.id, video, reply_markup=markup)
         self.bot.register_next_step_handler(message, self.update_db_by_reaction, queue)
 
@@ -155,18 +178,12 @@ class VideoHoster:
 
         self.send_video(message, queue[1:])
 
-    def studio(self, message: Message):
-        markup = ReplyKeyboardMarkup()
-        markup.row(KeyboardButton("📼 Просмотреть загруженные вами видео"), KeyboardButton("📹 Загрузить видео"))
-        markup.row(KeyboardButton("🎥 Загрузить несколько видео"), KeyboardButton("◀ Назад"))
-        self.bot.send_message(message.chat.id, f"Добро пожаловать в студию, {message.chat.first_name}!",
-                              reply_markup=markup)
-        self.bot.register_next_step_handler(message, self.filter_messages)
-
     def receive_video(self, message: Message, many: bool = False) -> None:
         if message.content_type == "video":
             if message.video.duration > 60:
-                self.bot.send_message(message.chat.id, "Извините, но ваше видео слишком длинное!")
+                bot_text = "Извините, но ваше видео слишком длинное!"
+                self.log(message, bot_text)
+                self.bot.send_message(message.chat.id, bot_text)
                 self.menu(message)
                 return
             date = dt.datetime.now()
@@ -189,23 +206,45 @@ class VideoHoster:
                    );
                     """)
             con.commit()
-            with open(f"videos/{message.chat.id}_{message.id}.mp4", mode="wb") as video_file:
+            video_filename = f"videos/{message.chat.id}_{message.id}.mp4"
+            with open(video_filename, mode="wb") as video_file:
                 file_info = self.bot.get_file(message.video.file_id)
                 video_file.write(self.bot.download_file(file_info.file_path))
-            self.bot.send_message(message.chat.id, "Видео успешно загружено на сервер!")
+            message.text = video_filename
+            bot_text = "Видео успешно загружено на сервер!"
+            self.log(message, bot_text)
+            self.bot.send_message(message.chat.id, bot_text)
             if not many:
-                self.studio(message)
+                markup = ReplyKeyboardMarkup()
+                markup.row(KeyboardButton("📼 Просмотреть загруженные вами видео"), KeyboardButton("📹 Загрузить видео"))
+                markup.row(KeyboardButton("🎥 Загрузить несколько видео"), KeyboardButton("◀ Назад"))
+                bot_text = f"Добро пожаловать в студию, {message.chat.first_name}!"
+                self.bot.send_message(message.chat.id, bot_text,
+                                      reply_markup=markup)
+                self.bot.register_next_step_handler(message, self.filter_messages)
             return
         self.menu(message)
 
-    def log(self, message: Message, bot_reaction: str):
-        filename = f"logs/user_{message.chat.id}.json"
-        if os.path.exists(filename):
-           ...
-        else:
+    def log(self, message: Message, bot_reaction: str) -> None:
+        try:
+            filename = f"logs/user_{message.chat.id}.json"
+            cur_dialog = [{
+                            "role": "user",
+                            "content": message.text,
+                        },
+                        {
+                            "role": "assistant",
+                            "content": bot_reaction
+                        }]
+            if os.path.exists(filename):
+                log_file_read = open(filename, mode="r", encoding="utf-8")
+                history: List = json.load(log_file_read)
+                log_file_read.close()
+            else:
+                history = []
             with open(filename, mode="w", encoding="utf-8") as log_file:
-                history = {
-                    "user": message.text,
-                    "assistant": bot_reaction
-                }
-                json.dump(history, log_file)
+                history.extend(cur_dialog)
+                json.dump(history, log_file, ensure_ascii=False, indent=2)
+        except Exception as err:
+            self.bot.send_message(self.hoster,
+                                  f"Ошибка у пользователя {message.chat.id} при выполнении метода log(): {err}")
