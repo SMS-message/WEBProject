@@ -1,6 +1,5 @@
 import datetime as dt
 from random import shuffle
-
 from telebot.types import *
 from telebot import TeleBot
 from .functions import *
@@ -18,17 +17,18 @@ class VideoHoster:
             markup = ReplyKeyboardMarkup()
             markup.row(KeyboardButton("📺 Смотреть видео"), KeyboardButton("📹 Зайти в студию"))
             markup.resize_keyboard = True
-            if self.l:
-                log_all(message.chat.id)
             if not user_table_exists(message.chat.id):
                 create_user_table(message.chat.id)
             else:
                 update_user_table(message.chat.id)
-            self.clear_history(message)
-            self.bot.send_message(message.chat.id, "Привет!", reply_markup=markup)
+            bot_text = "Привет!"
+            if self.l:
+                self.log(message, bot_text)
+            self.bot.send_message(message.chat.id, bot_text, reply_markup=markup)
             self.bot.register_next_step_handler(message, self.menu)
         except Exception as err:
-            self.bot.send_message(self.hoster, f"Ошибка у пользователя {message.chat.id} при выполнении метода greet(): {err}")
+            self.bot.send_message(self.hoster,
+                                  f"Ошибка у пользователя {message.chat.id} при выполнении метода greet(): {err}")
 
     def menu(self, message: Message) -> None:
         if self.filter_messages(message):
@@ -41,10 +41,7 @@ class VideoHoster:
                 messages = json.load(dialog_log)
         except json.decoder.JSONDecodeError:
             messages = []
-        messages.append({"role": "user", "content": message.text})
         bot_text = "Извините, я вас не понял. Выберите одну из опций на вашей клавиатуре! 😉"
-        messages.append({"role": "assistant", "content": bot_text})
-        log_dialog(messages, message.chat.id)
 
         self.bot.send_message(message.chat.id, bot_text, reply_markup=markup)
         self.bot.register_next_step_handler(message, self.menu)
@@ -70,11 +67,12 @@ class VideoHoster:
             case "📼 Просмотреть загруженные вами видео":
                 ...
             case "📹 Загрузить видео":
-                self.bot.send_message(message.chat.id,"Пришлите своё видео :)", reply_markup=ReplyKeyboardRemove())
+                self.bot.send_message(message.chat.id, "Пришлите своё видео :)", reply_markup=ReplyKeyboardRemove())
                 self.bot.register_next_step_handler(message, self.receive_video)
                 filtered = True
             case "🎥 Загрузить несколько видео":
-                self.bot.send_message(message.chat.id, "Хорошо, когда закончите напишите команду /stop", reply_markup=ReplyKeyboardRemove())
+                self.bot.send_message(message.chat.id, "Хорошо, когда закончите напишите команду /stop",
+                                      reply_markup=ReplyKeyboardRemove())
                 self.bot.register_next_step_handler(message, self.receive_many_videos)
                 filtered = True
             case "◀ Назад":
@@ -165,7 +163,7 @@ class VideoHoster:
                               reply_markup=markup)
         self.bot.register_next_step_handler(message, self.filter_messages)
 
-    def receive_video(self, message: Message, many: bool=False) -> None:
+    def receive_video(self, message: Message, many: bool = False) -> None:
         if message.content_type == "video":
             if message.video.duration > 60:
                 self.bot.send_message(message.chat.id, "Извините, но ваше видео слишком длинное!")
@@ -200,9 +198,14 @@ class VideoHoster:
             return
         self.menu(message)
 
-    def clear_history(self, message: Message):
-        try:
-            with open(f"logs/dialog_log_{message.chat.id}.json", mode="w", encoding="utf-8"):
-                pass
-        except Exception as err:
-            self.bot.send_message(self.hoster, f"Ошибка у пользователя {message.chat.id}: {err}")
+    def log(self, message: Message, bot_reaction: str):
+        filename = f"logs/user_{message.chat.id}.json"
+        if os.path.exists(filename):
+           ...
+        else:
+            with open(filename, mode="w", encoding="utf-8") as log_file:
+                history = {
+                    "user": message.text,
+                    "assistant": bot_reaction
+                }
+                json.dump(history, log_file)
