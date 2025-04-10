@@ -2,8 +2,8 @@ import sqlite3
 from typing import List, Tuple
 
 
-def user_table_exists(user_id: int):
-    con = sqlite3.connect("db/VideoHoster.db")
+def user_table_exists(user_id: int, path_to_db: str):
+    con = sqlite3.connect(path_to_db)
     cur = con.cursor()
 
     try:
@@ -14,8 +14,8 @@ def user_table_exists(user_id: int):
     return True
 
 
-def create_user_table(user_id: int):
-    con = sqlite3.connect("db/VideoHoster.db")
+def create_user_table(user_id: int, path_to_db:str):
+    con = sqlite3.connect(path_to_db)
     cur = con.cursor()
 
     cur.execute(f"""
@@ -35,8 +35,8 @@ def create_user_table(user_id: int):
     con.commit()
 
 
-def make_queue(user_id: int) -> List[int]:
-    con = sqlite3.connect("db/VideoHoster.db")
+def make_queue(user_id: int, path_to_db: str) -> List[int]:
+    con = sqlite3.connect(path_to_db)
     cur = con.cursor()
 
     res = tuple(cur.execute(f"""SELECT ID
@@ -71,8 +71,8 @@ def make_queue(user_id: int) -> List[int]:
     return refactor_result(res)
 
 
-def update_user_table(user_id: int):
-    con = sqlite3.connect("db/VideoHoster.db")
+def update_user_table(user_id: int, path_do_db: str):
+    con = sqlite3.connect(path_do_db)
     cur = con.cursor()
 
     cur.execute(f"""

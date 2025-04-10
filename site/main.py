@@ -10,7 +10,7 @@ def main() -> None:
     @app.route("/")
     @app.route("/index")
     def index() -> str:
-        n = len(tuple(sqlite3.connect("../bot/db/VideoHoster.db").cursor().execute("SELECT ID FROM Videos;")))
+        n = len(tuple(sqlite3.connect("../db/VideoHoster.db").cursor().execute("SELECT ID FROM Videos;")))
 
         return render_template("index.html", number_of_videos=n, title="Video Hoster")
 
