@@ -1,7 +1,8 @@
 /.idea/
 /.venv/
-/bot/data/blacklist.txt
-/bot/logs/
-/bot/videos/
+/.venv1/
+/data/blacklist.txt
+/logs/
+/videos/
 /db/VideoHosterBackup.db
 .env
