@@ -75,7 +75,7 @@ class VideoHoster:
         try:
             filtered = False
             bot_text: str = ""
-            with open("data/blacklist.txt", mode="r") as file:
+            with open("../data/blacklist.txt", mode="r") as file:
                 if str(message.chat.id) in file.read():
                     bot_text = "Извините, вы находитесь в чёрном списке бота"
                     self.bot.send_message(message.chat.id, bot_text)
@@ -171,7 +171,7 @@ class VideoHoster:
                        KeyboardButton("👎"),
                        KeyboardButton("⏩"))
             markup.resize_keyboard = True
-            video_filename = f"videos/{author_id}_{message_id}.mp4"
+            video_filename = f"../videos/{author_id}_{message_id}.mp4"
             with open(video_filename, mode="rb") as video:
                 self.log(message.text, message.chat.id, video_filename)
                 self.bot.send_video(message.chat.id, video, reply_markup=markup)
@@ -236,7 +236,7 @@ class VideoHoster:
                        );
                         """)
                 con.commit()
-                video_filename = f"videos/{message.chat.id}_{message.id}.mp4"
+                video_filename = f"../videos/{message.chat.id}_{message.id}.mp4"
                 with open(video_filename, mode="wb") as video_file:
                     file_info = self.bot.get_file(message.video.file_id)
                     video_file.write(self.bot.download_file(file_info.file_path))
@@ -254,7 +254,7 @@ class VideoHoster:
 
     def log(self, message_text: str | None, message_chat_id: int, bot_reaction: str | None) -> None:
         try:
-            filename = f"logs/user_{message_chat_id}.json"
+            filename = f"../logs/user_{message_chat_id}.json"
             cur_dialog = []
             if message_text:
                 cur_dialog.append({
