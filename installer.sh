@@ -1,8 +1,5 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
-python -m venv .venv
-.venv/Scripts/activate
-pip install -r requirements.txt
-mkdir bot/videos
-mkdir bot/logs
-touch bot/data/blacklist.txt
+mkdir videos
+mkdir logs
+touch data/blacklist.txt
