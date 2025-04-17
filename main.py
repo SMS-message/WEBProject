@@ -11,7 +11,7 @@ def main() -> None:
     parser.add_argument("-l", "--log", action="store_true")
     args = parser.parse_args()
     load_dotenv()
-    path_to_db = "../db/VideoHoster.db"
+    path_to_db = "db/VideoHoster.db"
     global_init(path_to_db)
     bot = VideoHoster(TeleBot(getenv("TOKEN")), do_log=args.log, hoster=getenv("HOSTER"), path_to_db=path_to_db)
 
