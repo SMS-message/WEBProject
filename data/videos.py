@@ -12,6 +12,3 @@ class Videos(SqlAlchemyBase, SerializerMixin):
     day = sqlalchemy.Column(sqlalchemy.Integer)
     month = sqlalchemy.Column(sqlalchemy.Integer)
     year = sqlalchemy.Column(sqlalchemy.Integer)
-
-
-

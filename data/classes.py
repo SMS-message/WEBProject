@@ -162,10 +162,6 @@ class VideoHoster:
             res = session.query(Videos).get(queue[0])
 
             message_id, author_id = res.message_id, res.author_id
-            # markup = InlineKeyboardMarkup()
-            # markup.row(InlineKeyboardButton(text="♥", callback_data="like"),
-            #            InlineKeyboardButton(text="👎", callback_data="dislike"),
-            #            InlineKeyboardButton(text="⏩", callback_data="next"))
             markup = ReplyKeyboardMarkup()
             markup.row(KeyboardButton("❤"),
                        KeyboardButton("👎"),
@@ -181,25 +177,22 @@ class VideoHoster:
                                   f"Ошибка у пользователя {message.chat.id} при выполнении метода send_video(): {err}")
     def update_db_by_reaction(self, message: Message, queue: List[int]):
         try:
-            con = sqlite3.connect(self.ptd)
-            cur = con.cursor()
+            session = create_session()
             if self.filter_messages(message):
                 return
             match message.text:
-                case "❤":
-                    cur.execute(f"""UPDATE Videos
-                                       SET likes = likes + 1
-                                     WHERE ID = "{queue[0]}";
-                                    """)
+                case "❤️":
+                    session.query(Videos).filter(Videos.ID == queue[0]).update({Videos.likes: Videos.likes + 1})
                 case "👎":
-                    cur.execute(f"""UPDATE Videos
-                                       SET dislikes = dislikes + 1
-                                     WHERE ID = "{queue[0]}";
-                                    """)
+                    session.query(Videos).filter(Videos.ID == queue[0]).update({Videos.dislikes: Videos.dislikes + 1})
+            session.commit()
+            con = sqlite3.connect(self.ptd)
+            cur = con.cursor()
+
             cur.execute(f"""UPDATE User_{message.chat.id}
-                               SET viewed = 1
-                             WHERE ID = "{queue[0]}";
-                            """)
+                                   SET viewed = 1
+                                 WHERE ID = "{queue[0]}";
+                                """)
             con.commit()
 
             self.send_video(message, queue[1:])
@@ -217,25 +210,17 @@ class VideoHoster:
                     self.menu(message)
                     return
                 date = dt.datetime.now()
-                con = sqlite3.connect(self.ptd)
-                cur = con.cursor()
-                cur.execute(f"""
-                INSERT INTO Videos (
-                           message_id,
-                           author_id,
-                           day,
-                           month,
-                           year
-                       )
-                       VALUES (
-                           "{message.id}",
-                           "{message.chat.id}",
-                           "{date.day}",
-                           "{date.month}",
-                           "{date.year}"
-                       );
-                        """)
-                con.commit()
+
+                session = create_session()
+                video = Videos()
+                video.message_id = message.id
+                video.author_id = message.chat.id
+                video.day = date.day
+                video.month = date.month
+                video.year = date.year
+                session.add(video)
+                session.commit()
+
                 video_filename = f"../videos/{message.chat.id}_{message.id}.mp4"
                 with open(video_filename, mode="wb") as video_file:
                     file_info = self.bot.get_file(message.video.file_id)

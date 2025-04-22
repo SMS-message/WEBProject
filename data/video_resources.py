@@ -44,7 +44,7 @@ class VideosResource(Resource):
             return jsonify(
                 {
                     "status": "200",
-                    "info": f"video {video.author_id}_{video.message_id}.mp4 succesfully deleted."
+                    "info": f"video {video.author_id}_{video.message_id}.mp4 was succesfully deleted."
                 }
             )
         except Exception as err:
