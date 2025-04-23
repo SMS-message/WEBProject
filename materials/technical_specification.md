@@ -25,7 +25,7 @@
    > - Импортируем все нужные нам классы и функции из /data/;
    > - [Схема работы](https://miro.com/app/board/uXjVIcKErGk=/?share_link_id=192393488939).
 5. Program code plan.
-    - Функции и декораторы:
+    - Функции:
    > main(), make_queue(), user_table_exists(), create_user_table(), update_user_table(), refactor_result();
     - Классы:
    > VideoHoster;
