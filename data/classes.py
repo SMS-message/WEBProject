@@ -95,7 +95,20 @@ class VideoHoster:
                     self.studio(message)
                     filtered = True
                 case "📼 Просмотреть загруженные вами видео":
-                    ...
+                    session = create_session()
+                    self_videos: List[Videos] = session.query(Videos).filter(Videos.author_id == message.chat.id).all()
+                    for videos in self_videos:
+                        ans = {
+                            "ID": videos.ID,
+                            "author_id": videos.author_id,
+                            "message_id": videos.message_id,
+                            "likes": videos.likes,
+                            "dislikes": videos.dislikes,
+                            "date": f"{videos.year}-{videos.month}-{videos.day}",
+                        }
+                        self.bot.send_message(message.chat.id, ans.__str__(), reply_markup=ReplyKeyboardRemove())
+                    self.bot.register_next_step_handler(message, self.menu)
+                    filtered = True
                 case "📹 Загрузить видео":
                     bot_text = "Пришлите своё видео :)"
                     self.bot.send_message(message.chat.id, bot_text, reply_markup=ReplyKeyboardRemove())
@@ -215,6 +228,8 @@ class VideoHoster:
                 video = Videos()
                 video.message_id = message.id
                 video.author_id = message.chat.id
+                video.likes = 0
+                video.dislikes = 0
                 video.day = date.day
                 video.month = date.month
                 video.year = date.year
